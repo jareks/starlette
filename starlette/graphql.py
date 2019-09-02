@@ -79,9 +79,17 @@ class GraphQLApp:
                 data = request.query_params
             elif "multipart/form-data" in content_type:
                 form = await request.form()
+                operation = form.get('operations')
+                if type(operation) == list:
+                    return PlainTextResponse(
+                        "Batching operations not implemented",
+                        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                    )
+
+                operation = json.loads(operation)
                 data = {
-                         "query": form.get('query'),
-                         "variables": json.loads(form.get('variables')),
+                         "query": operation.get('query'),
+                         "variables": operation.get('variables'),
                        }
 
                 for (key, value) in form.items():
