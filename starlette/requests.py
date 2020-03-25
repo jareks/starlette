@@ -11,7 +11,7 @@ from starlette.types import Message, Receive, Scope, Send
 try:
     from multipart.multipart import parse_options_header
 except ImportError:  # pragma: nocover
-    parse_options_header = None  # type: ignore
+    parse_options_header = None
 
 
 SERVER_PUSH_HEADERS_TO_COPY = {
@@ -91,7 +91,10 @@ class HTTPConnection(Mapping):
             cookie_header = self.headers.get("cookie")
             if cookie_header:
                 cookie = http.cookies.SimpleCookie()  # type: http.cookies.BaseCookie
-                cookie.load(cookie_header)
+                try:
+                    cookie.load(cookie_header)
+                except http.cookies.CookieError:
+                    pass
                 for key, morsel in cookie.items():
                     cookies[key] = morsel.value
             self._cookies = cookies
